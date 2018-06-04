@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
-# Use this script as follows: Rscript ToivonenExperiment.R <input>
+# Use this script as follows: Rscript RiondatoExperiment.R <input>
 # There will be #ss number of output files which name will be in the following format
-# input_toivonen_ss_time.taken.out
+# input_riondato_ss_time.taken.out
 
 # Disable warnings from package loading.
 options(warn=-1)
@@ -36,7 +36,7 @@ ss <- list(1819, 45461, 140153)
 #calculated by bound riondato
 
 
-for(i in ss){
+for (i in ss){
   ans_fp <- 0
   ans_sup <- 0
   ans_fn <- 0
@@ -53,10 +53,10 @@ for(i in ss){
     res_r <- (intersect(result_true, result_riondato))
     
     tot <- 0
-    for(i in seq_along(res_r)){
-      for(x in seq_along(result_true)){
-        if(identical(res_r[i]@items, result_true[x]@items)){
-          print("iterate")
+    for (i in seq_along(res_r)){
+      for (x in seq_along(result_true)){
+        if (identical(res_r[i]@items, result_true[x]@items)){
+          #print("iterate")
           tot <- tot + abs(result_true[x]@quality[1] - res_r[i]@quality[1])
         }
       }
@@ -69,7 +69,7 @@ for(i in ss){
     ans_fp[cnt] <- fp
     ans_fn[cnt] <- fn
     
-    if(cnt > 10) {
+    if (cnt > 10) {
       break
     }
     
@@ -79,7 +79,7 @@ for(i in ss){
   
   data <- data.frame(ans_fn, ans_fp, ans_sup)
   colnames(data) <- c("FN", "FP", "SUPP")
-  write.table(data, file = paste(file.used, "_toivonen_", ss, "_", time.taken, ".out", sep = ''), quote = F, row.names = F, col.names = T, sep = '\t')
+  write.table(data, file = paste(file.used, "_riondato_", ss, "_", time.taken, ".out", sep = ''), quote = F, row.names = F, col.names = T, sep = '\t')
 }
 
 
