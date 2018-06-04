@@ -1,6 +1,32 @@
-library("arules")
+#!/usr/bin/env Rscript
+# Use this script as follows: Rscript ToivonenExperiment.R <input>
+# There will be #ss number of output files which name will be in the following format
+# input_toivonen_ss_time.taken.out
 
-t <- read.transactions("kosarak.dat",format="basket")
+# Disable warnings from package loading.
+options(warn=-1)
+
+args = commandArgs(trailingOnly=TRUE)
+
+# Test if there is at least one argument: if not, return an error
+if (length(args)==0) {
+  stop("One argument must be supplied (input file).", call.=FALSE)
+}
+
+# Load libraries
+if (!suppressMessages(require("arules", quietly = T))){
+  install.packages("arules", quiet = T, verbose = F)
+  library("arules", quietly = T, verbose = F)
+}
+
+# Get the input file and split it at the last '.' keeping the main name without the extension. 
+# We will use this as our output file
+raw.filename <- args[1]
+filename <- strsplit(raw.filename, "\\.", perl = TRUE) 
+file.used <- filename[[1]][1]
+
+t <- read.transactions(raw.filename, format="basket")
+
 itemsets_true <- apriori(t, parameter = list(target = "frequent itemset", supp=0.01, minlen = 2, maxlen=nrow(t)))
 result_true <- sort(itemsets_true, by="support", decreasing=TRUE)
 
@@ -50,11 +76,10 @@ for(i in ss){
   }
   end.time <- Sys.time()
   time.taken <- end.time - start.time
-  time.taken
   
-  print(ans_fn)
-  print(ans_sup)
-  print(ans_fp)
+  data <- data.frame(ans_fn, ans_fp, ans_sup)
+  colnames(data) <- c("FN", "FP", "SUPP")
+  write.table(data, file = paste(file.used, "_toivonen_", ss, "_", time.taken, ".out", sep = ''), quote = F, row.names = F, col.names = T, sep = '\t')
 }
 
 
