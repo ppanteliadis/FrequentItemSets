@@ -30,11 +30,8 @@ t <- read.transactions(raw.filename, format="basket")
 itemsets_true <- apriori(t, parameter = list(target = "frequent itemset", supp=0.01, minlen = 2, maxlen=nrow(t)))
 result_true <- sort(itemsets_true, by="support", decreasing=TRUE)
 
-#ss <- list(219, 5461, 21843, 100000, 100000, 100000)
-
+# Calculated by Riondato sample bound
 ss <- list(1819, 45461, 140153)
-#calculated by bound riondato
-
 
 for (i in ss){
   ans_fp <- 0

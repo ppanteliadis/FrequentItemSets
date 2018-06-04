@@ -31,7 +31,8 @@ t <- read.transactions(raw.filename, format="basket")
 itemsets_true <- apriori(t, parameter = list(target = "frequent itemset", supp=0.01, minlen = 2, maxlen=nrow(t)), control = list(verbose = FALSE))
 result_true <- sort(itemsets_true, by="support", decreasing=TRUE)
 
-ss <- list(300, 1199, 29958, 119830, 140153) #calculated by tv sample bound
+# Calculated by Toivonen sample bound
+ss <- list(300, 1199, 29958, 119830, 140153) 
 
 for(sample in ss){
   ans_fp <- 0
