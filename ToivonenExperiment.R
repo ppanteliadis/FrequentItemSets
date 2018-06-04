@@ -1,9 +1,34 @@
-library("arules")
+#!/usr/bin/env Rscript
+# Use this script as follows: Rscript ToivonenExperiment.R <input>
+# There will be #ss number of output files which name will be in the following format
+# input_toivonen_ss_time.taken.out
 
-#t <- read.transactions("100K.dat",format="basket")
-t <- read.transactions("kosarak.dat",format="basket")
+# Disable warnings from package loading.
+options(warn=-1)
 
-itemsets_true <- apriori(t, parameter = list(target = "frequent itemset", supp=0.01, minlen = 2, maxlen=nrow(t)))
+args = commandArgs(trailingOnly=TRUE)
+
+# Test if there is at least one argument: if not, return an error
+if (length(args)==0) {
+  stop("One argument must be supplied (input file).", call.=FALSE)
+}
+
+# Load libraries
+if (!suppressMessages(require("arules", quietly = T))){
+  install.packages("arules", quiet = T, verbose = F)
+  library("arules", quietly = T, verbose = F)
+}
+
+
+# Get the input file and split it at the last '.' keeping the main name without the extension. 
+# We will use this as our output file
+raw.filename <- args[1]
+filename <- strsplit(raw.filename, "\\.", perl = TRUE) 
+file.used <- filename[[1]][1]
+
+t <- read.transactions(raw.filename, format="basket")
+
+itemsets_true <- apriori(t, parameter = list(target = "frequent itemset", supp=0.01, minlen = 2, maxlen=nrow(t)), control = list(verbose = FALSE))
 result_true <- sort(itemsets_true, by="support", decreasing=TRUE)
 
 ss <- list(300, 1199, 29958, 119830, 140153) #calculated by tv sample bound
@@ -28,11 +53,11 @@ for(sample in ss){
     res_t <- (intersect(result_true, result_toivonen))
     
     tot <- 0
-    for(i in seq_along(res_r)){
+    for(i in seq_along(res_t)){
       for(x in seq_along(result_true)){
-        if(identical(res_r[i]@items, result_true[x]@items)){
-          print("iterate")
-          tot <- tot + abs(result_true[x]@quality[1] - res_r[i]@quality[1])
+        if(identical(res_t[i]@items, result_true[x]@items)){
+          #print("iterate")
+          tot <- tot + abs(result_true[x]@quality[1] - res_t[i]@quality[1])
         }
       }
     }
@@ -51,13 +76,8 @@ for(sample in ss){
   }
   end.time <- Sys.time()
   time.taken <- end.time - start.time
-  time.taken
   
-  print(ans_fn)
-  print(ans_fp)
-  print.table(ans_sup)
+  data <- data.frame(ans_fn, ans_fp, ans_sup)
+  colnames(data) <- c("FN", "FP", "SUPP")
+  write.table(data, file = paste(file.used, "_toivonen_", ss, "_", time.taken, ".out", sep = ''), quote = F, row.names = F, col.names = T, sep = '\t')
 }
-
-
-
-
