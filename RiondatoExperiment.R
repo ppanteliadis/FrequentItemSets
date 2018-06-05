@@ -31,7 +31,7 @@ itemsets_true <- apriori(t, parameter = list(target = "frequent itemset", supp=0
 result_true <- sort(itemsets_true, by="support", decreasing=TRUE)
 
 # Calculated by Riondato sample bound
-ss <- list(1819, 45461, 140153)
+ss <- list(219, 5461, 21843, 100000)
 
 for (i in ss){
   ans_fp <- 0
@@ -74,9 +74,12 @@ for (i in ss){
   end.time <- Sys.time()
   time.taken <- end.time - start.time
   
-  data <- data.frame(ans_fn, ans_fp, ans_sup)
+  # Output the results for the sample in to a file.
+  data <- data.frame(ans_fn, ans_fp, unlist(ans_sup))
+  
   colnames(data) <- c("FN", "FP", "SUPP")
-  write.table(data, file = paste(file.used, "_riondato_", ss, "_", time.taken, ".out", sep = ''), quote = F, row.names = F, col.names = T, sep = '\t')
+  
+  write.table(data, file = paste(file.used, "_riondato_", sample, ".out", sep = ''), quote = F, row.names = F, col.names = T, sep = '\t')
 }
 
 

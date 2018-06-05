@@ -22,7 +22,7 @@ if (!suppressMessages(require("arules", quietly = T))){
 
 # Get the input file and split it at the last '.' keeping the main name without the extension. 
 # We will use this as our output file
-raw.filename <- args[1]
+raw.filename <- 'T10I4D100K.txt'
 filename <- strsplit(raw.filename, "\\.", perl = TRUE) 
 file.used <- filename[[1]][1]
 
@@ -32,15 +32,14 @@ itemsets_true <- apriori(t, parameter = list(target = "frequent itemset", supp=0
 result_true <- sort(itemsets_true, by="support", decreasing=TRUE)
 
 # Calculated by Toivonen sample bound
-ss <- list(300, 1199, 29958, 119830, 140153) 
+ss <- list(12, 300, 1199, 29958) 
 
-for(sample in ss){
+for (sample in ss){
   ans_fp <- 0
   ans_sup <- 0
   ans_fn <- 0
   fn<-0
   fp<-0
-  
   
   start.time <- Sys.time()
   cnt <- 1
@@ -48,15 +47,16 @@ for(sample in ss){
   repeat {
     cnt <- cnt+1
     sample_toivonen <- sample(t, sample)
-    itemsets_toivonen <- apriori(sample_toivonen, parameter = list(target = "frequent itemset", supp=0.0082, minlen = 2, maxlen=nrow(t)), control=list(verbose = FALSE))
+    itemsets_toivonen <- apriori(sample_toivonen, parameter = list(target = "frequent itemset", supp=0.0082, 
+                                                                   minlen = 2, maxlen=nrow(t)), control=list(verbose = FALSE))
     #new support threshold calcualted by bound.
     result_toivonen <- sort(itemsets_toivonen, by="support", decreasing=TRUE)
     res_t <- (intersect(result_true, result_toivonen))
     
     tot <- 0
-    for(i in seq_along(res_t)){
-      for(x in seq_along(result_true)){
-        if(identical(res_t[i]@items, result_true[x]@items)){
+    for (i in seq_along(res_t)){
+      for (x in seq_along(result_true)){
+        if (identical(res_t[i]@items, result_true[x]@items)){
           #print("iterate")
           tot <- tot + abs(result_true[x]@quality[1] - res_t[i]@quality[1])
         }
@@ -78,7 +78,10 @@ for(sample in ss){
   end.time <- Sys.time()
   time.taken <- end.time - start.time
   
-  data <- data.frame(ans_fn, ans_fp, ans_sup)
+  # Output the results for the sample in to a file.
+  data <- data.frame(ans_fn, ans_fp, unlist(ans_sup))
+  
   colnames(data) <- c("FN", "FP", "SUPP")
-  write.table(data, file = paste(file.used, "_toivonen_", ss, "_", time.taken, ".out", sep = ''), quote = F, row.names = F, col.names = T, sep = '\t')
+  
+  write.table(data, file = paste(file.used, "_toivonen_", sample, ".out", sep = ''), quote = F, row.names = F, col.names = T, sep = '\t')
 }
