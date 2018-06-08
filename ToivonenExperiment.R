@@ -22,7 +22,9 @@ if (!suppressMessages(require("arules", quietly = T))){
 
 # Get the input file and split it at the last '.' keeping the main name without the extension. 
 # We will use this as our output file
-raw.filename <- 'T10I4D100K.txt'
+raw.filename <- args[1]
+raw.filename <- 'kosarak.dat'
+
 filename <- strsplit(raw.filename, "\\.", perl = TRUE) 
 file.used <- filename[[1]][1]
 
@@ -32,7 +34,7 @@ itemsets_true <- apriori(t, parameter = list(target = "frequent itemset", supp=0
 result_true <- sort(itemsets_true, by="support", decreasing=TRUE)
 
 # Calculated by Toivonen sample bound
-ss <- list(12, 300, 1199, 29958) 
+ss <- list(300, 1199, 29958) 
 
 for (sample in ss){
   ans_fp <- 0
@@ -47,7 +49,7 @@ for (sample in ss){
   repeat {
     cnt <- cnt+1
     sample_toivonen <- sample(t, sample)
-    itemsets_toivonen <- apriori(sample_toivonen, parameter = list(target = "frequent itemset", supp=0.0082, 
+    itemsets_toivonen <- apriori(sample_toivonen, parameter = list(target = "frequent itemset", supp=0.0042, 
                                                                    minlen = 2, maxlen=nrow(t)), control=list(verbose = FALSE))
     #new support threshold calcualted by bound.
     result_toivonen <- sort(itemsets_toivonen, by="support", decreasing=TRUE)
